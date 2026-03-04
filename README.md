@@ -1,36 +1,46 @@
-# TeX Studio Local
+# TecTex
 
-TeX Studio Local is a local-first Windows desktop app for editing TeX resumes and exporting PDF.
+I started **TecTex** because I wanted to make a genuinely good resume, and I realized LaTeX gives the best results for clean, professional formatting.
 
-## Features
+The problem: LaTeX tools can feel annoying for quick resume edits.
 
-- TeX editor with live PDF preview
-- Native `Save As PDF` dialog in desktop mode
-- Structured `Edit Resume` mode:
-  - parses existing TeX resume sections
-  - maps recognized fields (profile, experience, education, projects, skills)
-  - regenerates safe TeX with escaping/validation
+So I built this as a local-first desktop app where I can:
+- edit TeX directly,
+- preview PDF quickly,
+- use a structured resume editor that detects sections from existing TeX and prevents easy formatting breakage.
+
+## What TecTex Does
+
+- TeX editor + PDF preview
+- Native `Save As PDF` in desktop mode
+- Structured `Edit Resume` mode that:
+- reads current TeX resume content,
+- detects sections (profile, experience, education, projects, skills),
+- maps fields into editable form inputs,
+- regenerates safe escaped TeX
 - Local PDF generation pipeline:
-  - bundled `tectonic` (if present)
-  - fallback to `tectonic` / `pdflatex` / `xelatex` / `lualatex` on PATH
-  - text-PDF fallback if no TeX engine is available
+- bundled `tectonic` if present,
+- fallback to `tectonic` / `pdflatex` / `xelatex` / `lualatex` from PATH,
+- final text-PDF fallback if no engine is available
 
-## Repository Layout
+## Tech Stack
 
-- `texviewer_app.py`: Python desktop launcher + local API server
-- `local_app/`: frontend (HTML/CSS/JS)
-- `scripts/setup_tectonic.ps1`: helper to bundle `tectonic` into `tools/tectonic`
-- `tools/tectonic/`: optional bundled engine folder
-- `texviewer_app.spec`: PyInstaller build config
-- `requirements.txt`: runtime Python dependency list
+- Python backend launcher/API: `texviewer_app.py`
+- Frontend app: `local_app/` (HTML/CSS/JS)
+- Packaging: PyInstaller (`texviewer_app.spec`)
 
-## Prerequisites
+## Project Structure
 
-- Windows 10/11
-- Python 3.9+ (recommended)
-- PowerShell
+- `texviewer_app.py`
+- `texviewer_app.spec`
+- `local_app/index.html`
+- `local_app/styles.css`
+- `local_app/app.js`
+- `scripts/setup_tectonic.ps1`
+- `tools/tectonic/README.txt`
+- `requirements.txt`
 
-## Setup (from a fresh clone)
+## Local Setup
 
 ```powershell
 python -m venv .venv
@@ -39,15 +49,16 @@ python -m venv .venv
 .\.venv\Scripts\python -m pip install pyinstaller
 ```
 
-## Optional: Bundle `tectonic` for fully local compile
+## Optional: Bundle Tectonic
+
+If you want local LaTeX compile without relying on system PATH:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 & .\scripts\setup_tectonic.ps1
 ```
 
-Expected output file:
-
+Expected bundled binary:
 - `tools\tectonic\tectonic.exe`
 
 ## Run in Dev Mode
@@ -56,30 +67,17 @@ Expected output file:
 .\.venv\Scripts\python .\texviewer_app.py --browser
 ```
 
-## Build EXE (PyInstaller)
+## Build Windows EXE
 
 ```powershell
 .\.venv\Scripts\python -m PyInstaller --clean --noconfirm .\texviewer_app.spec
 ```
 
-Build output:
-
+Output:
 - `dist\TeXViewerDesktop.exe`
 
-## Reproducible Workflow
+## Why This Exists
 
-1. Clone repo
-2. Create venv and install dependencies
-3. Optionally bundle `tectonic`
-4. Build with PyInstaller spec
-5. Run or ship `dist\TeXViewerDesktop.exe`
-
-## Shipping the EXE
-
-If you want to distribute binaries publicly, the recommended approach is:
-
-1. Keep source in Git
-2. Build EXE in CI or release machine
-3. Upload `TeXViewerDesktop.exe` to GitHub Releases
-
-If you prefer committing the EXE directly, you can, but repository size will grow over time.
+This is a personal project that grew from my own workflow pain.
+I wanted resume quality from LaTeX without the usual friction.
+TecTex is my attempt to make that process faster, safer, and practical for day-to-day updates.
