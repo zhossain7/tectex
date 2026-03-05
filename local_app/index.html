@@ -1,27 +1,92 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TeX Studio Local</title>
+  <title>TecTex — LaTeX Resume Editor</title>
+  <meta name="description"
+    content="Local-first LaTeX resume editor with live PDF preview, structured editing, and professional templates.">
+
   <link rel="stylesheet" href="/local_app/styles.css">
 </head>
+
 <body>
   <div class="page-bg" aria-hidden="true"></div>
+
   <div class="app-shell">
+    <!-- ─── Header ─── -->
     <header class="app-header">
       <div class="brand">
-        <h1>TeX Studio Local</h1>
-        <p>Local editor with PDF preview and export</p>
+        <h1>
+          <span class="brand-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+              <polyline points="10 9 9 9 8 9" />
+            </svg>
+          </span>
+          TecTex
+        </h1>
+        <p>LaTeX Resume Editor &mdash; Edit, Preview, Export</p>
       </div>
       <div class="toolbar">
-        <button id="newBtn" class="btn btn-ghost" type="button">New</button>
-        <button id="openBtn" class="btn btn-ghost" type="button">Open TeX</button>
-        <button id="saveTexBtn" class="btn btn-ghost" type="button">Save .tex</button>
-        <button id="editResumeBtn" class="btn btn-ghost" type="button">Edit Resume</button>
-        <button id="previewBtn" class="btn btn-accent" type="button">Preview PDF</button>
-        <button id="savePdfBtn" class="btn btn-warm" type="button">Save As PDF</button>
-        <label class="engine">
+        <div class="toolbar-group">
+          <button id="newBtn" class="btn btn-ghost" type="button" title="New document (Ctrl+N)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="12" y1="18" x2="12" y2="12" />
+              <line x1="9" y1="15" x2="15" y2="15" />
+            </svg>
+            New
+          </button>
+          <button id="openBtn" class="btn btn-ghost" type="button" title="Open .tex file">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+            </svg>
+            Open
+          </button>
+          <button id="saveTexBtn" class="btn btn-ghost" type="button" title="Save .tex (Ctrl+S)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+              <polyline points="17 21 17 13 7 13 7 21" />
+              <polyline points="7 3 7 8 15 8" />
+            </svg>
+            Save .tex
+          </button>
+        </div>
+        <div class="toolbar-divider"></div>
+        <div class="toolbar-group">
+          <button id="templatesBtn" class="btn btn-ghost" type="button" title="Resume templates">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7" />
+              <rect x="14" y="3" width="7" height="7" />
+              <rect x="3" y="14" width="7" height="7" />
+              <rect x="14" y="14" width="7" height="7" />
+            </svg>
+            Templates
+          </button>
+          <button id="previewBtn" class="btn btn-accent" type="button" title="Preview PDF (Ctrl+Enter)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+            Compile
+          </button>
+          <button id="savePdfBtn" class="btn btn-warm" type="button" title="Export as PDF">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Export PDF
+          </button>
+        </div>
+        <div class="toolbar-divider"></div>
+        <label class="engine-select">
           <span>Engine</span>
           <select id="engineSelect">
             <option value="auto">Auto</option>
@@ -34,79 +99,174 @@
       </div>
     </header>
 
-    <main class="workspace">
-      <section class="panel editor-panel">
+    <!-- ─── Workspace ─── -->
+    <main class="workspace" id="workspace">
+      <!-- Drag-resizable editor panel -->
+      <section class="panel editor-panel" id="editorPanel">
         <div class="panel-header">
-          <h2>Editor</h2>
+          <div class="tab-bar" id="editorTabs">
+            <button class="tab active" data-tab="source" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="16 18 22 12 16 6" />
+                <polyline points="8 6 2 12 8 18" />
+              </svg>
+              TeX Source
+            </button>
+            <button class="tab" data-tab="builder" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <line x1="3" y1="9" x2="21" y2="9" />
+                <line x1="9" y1="21" x2="9" y2="9" />
+              </svg>
+              Resume Builder
+            </button>
+            <div class="tab-indicator" id="tabIndicator"></div>
+          </div>
           <div class="panel-meta" id="fileLabel">Untitled.tex</div>
         </div>
-        <textarea id="editor" spellcheck="false"></textarea>
+
+        <!-- Tab: TeX Source (CodeMirror) -->
+        <div class="tab-content active" id="sourceTab">
+          <div id="cmEditor" class="cm-host"></div>
+        </div>
+
+        <!-- Tab: Resume Builder -->
+        <div class="tab-content" id="builderTab">
+          <div class="builder-scroll">
+            <!-- Preamble -->
+            <section class="rb-section rb-collapsible" id="preambleSection">
+              <div class="rb-section-head" data-toggle="preamble">
+                <h4>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                  Preamble &amp; Packages
+                </h4>
+                <span class="rb-tag">Advanced</span>
+              </div>
+              <div class="rb-collapsible-body" id="preambleBody">
+                <label>Document class, usepackage, and custom commands
+                  <textarea id="rdPreamble" rows="6" spellcheck="false"
+                    placeholder="\documentclass[11pt]{article}&#10;\usepackage{geometry}&#10;..."></textarea>
+                </label>
+              </div>
+            </section>
+
+            <!-- Header Block -->
+            <section class="rb-section">
+              <div class="rb-section-head">
+                <h4>Header Block</h4>
+                <span class="rb-tag">Optional</span>
+              </div>
+              <label>Content between \begin{center}...\end{center} (raw TeX)
+                <textarea id="rdHeaderBlock" rows="6" spellcheck="false"
+                  placeholder="\begin{center} ... \end{center}"></textarea>
+              </label>
+            </section>
+
+            <!-- Sections -->
+            <section class="rb-section">
+              <div class="rb-section-head">
+                <h4>Sections</h4>
+                <button id="rdAddSection" type="button" class="btn btn-ghost btn-sm">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                  Add Section
+                </button>
+              </div>
+              <div id="rdSections" class="rb-list"></div>
+            </section>
+          </div>
+
+          <div id="rbError" class="rb-error" aria-live="polite"></div>
+
+          <div class="builder-actions">
+            <button id="resumeApplyBtn" type="button" class="btn btn-accent">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              Apply &amp; Compile
+            </button>
+          </div>
+        </div>
       </section>
 
-      <section class="panel preview-panel">
+      <!-- Resize handle -->
+      <div class="resize-handle" id="resizeHandle" title="Drag to resize">
+        <svg width="8" height="24" viewBox="0 0 8 24" fill="currentColor" opacity="0.35">
+          <circle cx="2" cy="6" r="1.5" />
+          <circle cx="6" cy="6" r="1.5" />
+          <circle cx="2" cy="12" r="1.5" />
+          <circle cx="6" cy="12" r="1.5" />
+          <circle cx="2" cy="18" r="1.5" />
+          <circle cx="6" cy="18" r="1.5" />
+        </svg>
+      </div>
+
+      <!-- Preview panel -->
+      <section class="panel preview-panel" id="previewPanel">
         <div class="panel-header">
           <h2>PDF Preview</h2>
-          <div class="panel-meta" id="previewMode">Not generated</div>
+          <div class="preview-meta-row">
+            <div class="panel-meta" id="previewMode">Not generated</div>
+            <div id="wordCount" class="panel-meta word-count"></div>
+          </div>
         </div>
-        <iframe id="pdfFrame" title="PDF Preview"></iframe>
+        <div class="preview-wrap">
+          <iframe id="pdfFrame" title="PDF Preview"></iframe>
+          <div id="compileOverlay" class="compile-overlay" hidden>
+            <div class="spinner"></div>
+            <span>Compiling…</span>
+          </div>
+        </div>
       </section>
     </main>
 
-    <section class="panel log-panel">
-      <div class="panel-header">
-        <h2>Build Log</h2>
+    <!-- ─── Build Log (collapsible) ─── -->
+    <section class="panel log-panel" id="logPanel">
+      <div class="panel-header log-toggle" id="logToggle">
+        <h2>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+          Build Log
+        </h2>
+        <span class="log-badge" id="logBadge" hidden>!</span>
       </div>
-      <pre id="logOutput">Ready.</pre>
+      <pre id="logOutput" class="log-body">Ready.</pre>
     </section>
 
+    <!-- ─── Status Bar ─── -->
     <footer class="statusbar">
       <span id="statusText">Ready.</span>
-      <span id="statusHint">Ctrl+Enter: preview, Ctrl+S: save .tex</span>
+      <span id="statusWordCount" class="status-count">0 words · 0 chars</span>
+      <span id="statusHint">Ctrl+Enter: compile &bull; Ctrl+S: save + compile</span>
     </footer>
   </div>
 
-  <input id="fileInput" type="file" accept=".tex,.txt,text/plain" hidden>
+  <input id="fileInput" type="file" accept=".tex,.txt,.cls,.sty,text/plain" hidden>
 
-  <div id="resumeModal" class="resume-modal" aria-hidden="true">
-    <div class="resume-modal-card" role="dialog" aria-modal="true" aria-labelledby="resumeModalTitle">
-      <div class="resume-modal-head">
-        <h3 id="resumeModalTitle">Dynamic Resume Editor</h3>
-        <button id="resumeCloseBtn" class="btn btn-ghost" type="button">Close</button>
+  <!-- ─── Template Picker Modal ─── -->
+  <div id="templateModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal-card template-modal-card" role="dialog" aria-modal="true" aria-labelledby="templateModalTitle">
+      <div class="modal-head">
+        <h3 id="templateModalTitle">Choose a Template</h3>
+        <button id="templateCloseBtn" class="btn btn-ghost btn-sm" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
       </div>
-
-      <p class="resume-modal-note">
-        Detected directly from your TeX. Edit header and sections without forcing a preset template.
-      </p>
-
-      <div class="resume-scroll">
-        <section class="rb-section">
-          <div class="rb-section-head">
-            <h4>Header Block</h4>
-            <span class="rb-tag">Optional</span>
-          </div>
-          <label>Content between \begin{center}...\end{center} (raw TeX)
-            <textarea id="rdHeaderBlock" rows="6" placeholder="\begin{center} ... \end{center}"></textarea>
-          </label>
-        </section>
-
-        <section class="rb-section">
-          <div class="rb-section-head">
-            <h4>Detected Sections</h4>
-            <button id="rdAddSection" type="button" class="btn btn-ghost">+ Add Section</button>
-          </div>
-          <div id="rdSections" class="rb-list"></div>
-        </section>
-      </div>
-
-      <div id="rbError" class="rb-error" aria-live="polite"></div>
-
-      <div class="resume-modal-actions">
-        <button id="resumeCancelBtn" type="button" class="btn btn-ghost">Cancel</button>
-        <button id="resumeApplyBtn" type="button" class="btn btn-accent">Apply to Editor</button>
-      </div>
+      <p class="modal-note">Start with a professionally designed LaTeX resume template. You can customize everything
+        afterwards.</p>
+      <div class="template-grid" id="templateGrid"></div>
     </div>
   </div>
 
-  <script src="/local_app/app.js"></script>
+  <script src="/local_app/bundle.js"></script>
 </body>
+
 </html>

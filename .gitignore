@@ -12,6 +12,9 @@ venv/
 build/
 dist/
 *.spec.bak
+node_modules/
+package-lock.json
+local_app/bundle.js
 
 # OS/editor noise
 .DS_Store

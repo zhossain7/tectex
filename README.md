@@ -51,6 +51,22 @@ python -m venv .venv
 .\.venv\Scripts\python -m pip install pyinstaller
 ```
 
+## Frontend Bundle (Required)
+
+`local_app/index.html` loads `local_app/bundle.js`, so build the frontend bundle before running the app.
+Install Node.js first if `npm` is not available.
+
+```powershell
+npm install
+npm run build
+```
+
+For active frontend development:
+
+```powershell
+npm run watch
+```
+
 ## Optional: Bundle Tectonic
 
 If you want local LaTeX compile without relying on system PATH:
