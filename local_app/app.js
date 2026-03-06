@@ -489,6 +489,26 @@ function hasLikelyTex(text) {
   return value ? /\\[a-zA-Z]+/.test(value) : false;
 }
 
+function looksLikeResume(text) {
+  const src = normalizeNewlines(text).toLowerCase();
+  if (!/\\begin\{document\}/i.test(src)) return false;
+  const resumeKeywords = ["experience", "education", "skills", "projects", "summary", "objective", "employment", "qualifications", "certifications", "awards"];
+  const sectionRe = /\\(?:section|subsection)\*?\{([^}]{0,60})\}/gi;
+  let match;
+  let hits = 0;
+  while ((match = sectionRe.exec(src)) !== null) {
+    const title = match[1].toLowerCase();
+    if (resumeKeywords.some((kw) => title.includes(kw))) hits++;
+  }
+  // Also check for \ressection or similar custom commands with resume keywords
+  const customSectionRe = /\\(?:ressection|cvsection|resumesection)\{([^}]{0,60})\}/gi;
+  while ((match = customSectionRe.exec(src)) !== null) {
+    const title = match[1].toLowerCase();
+    if (resumeKeywords.some((kw) => title.includes(kw))) hits++;
+  }
+  return hits >= 2;
+}
+
 // ─── pywebview Save ───
 function waitForPywebviewApi(timeoutMs = 1800) {
   return new Promise((resolve) => {
@@ -557,7 +577,14 @@ function handleOpenFile(file) {
     collapseLog();
     showLogBadge(false);
     updateWordCount();
-    switchTab("source", { skipBuilderSync: true });
+
+    // Auto-detect resume and offer to open in Resume Builder
+    if (looksLikeResume(content)) {
+      switchTab("builder");
+      setStatus(`Loaded ${state.fileName} — resume detected, opened in builder.`, "ok");
+    } else {
+      switchTab("source", { skipBuilderSync: true });
+    }
   };
   reader.onerror = () => setStatus("Failed to read selected file.", "error");
   reader.readAsText(file, "utf-8");
@@ -898,8 +925,15 @@ function extractHeaderBlock(body) {
   const centerRe = /\\begin\{center\}[\s\S]*?\\end\{center\}/i;
   const match = centerRe.exec(source);
   if (!match) return { headerBlock: "", rest: source };
-  const rest = source.slice(0, match.index) + source.slice(match.index + match[0].length);
-  return { headerBlock: match[0], rest };
+  // Preserve whitespace around the header block for round-trip fidelity
+  const before = source.slice(0, match.index);
+  const after = source.slice(match.index + match[0].length);
+  // Collapse the join point: use the larger whitespace gap from either side
+  const trailingBefore = (before.match(/\n*$/) || [""])[0];
+  const leadingAfter = (after.match(/^\n*/) || [""])[0];
+  const separator = trailingBefore.length >= leadingAfter.length ? trailingBefore : leadingAfter;
+  const rest = before.replace(/\n*$/, "") + separator + after.replace(/^\n*/, "");
+  return { headerBlock: match[0].trim(), rest };
 }
 
 function splitEdgeWhitespace(text) {
@@ -1171,7 +1205,10 @@ function appendSectionCard(section = blankSection()) {
           </span>
           <span class="rb-card-title">Section Block</span>
         </div>
-        <button type="button" class="rb-remove" data-remove="section">Remove</button>
+        <div class="rb-card-actions">
+          <button type="button" class="rb-duplicate" data-duplicate="section" title="Duplicate this section">Duplicate</button>
+          <button type="button" class="rb-remove" data-remove="section">Remove</button>
+        </div>
       </div>
       <div class="rd-grid">
         <label>Type
@@ -1784,6 +1821,46 @@ function installEvents() {
   });
 
   rdSections.addEventListener("click", (e) => {
+    // Duplicate section
+    const dupBtn = e.target.closest('button[data-duplicate="section"]');
+    if (dupBtn) {
+      const card = dupBtn.closest('[data-card="section"]');
+      if (card) {
+        const cmd = card.querySelector(".rd-cmd").value;
+        const title = card.querySelector(".rd-title").value.trim();
+        const content = normalizeNewlines(card.querySelector(".rd-content").value);
+        const starred = card.querySelector(".rd-star").checked;
+        let meta = {};
+        try { meta = JSON.parse(decodeURIComponent(card.dataset.meta || "%7B%7D")); } catch (e) { meta = {}; }
+        const dupSection = {
+          kind: cmd === "raw" ? "raw" : "heading",
+          cmd,
+          starred,
+          title: title ? `${title} (copy)` : "",
+          content,
+          leadingComments: meta.leadingComments || "",
+          trailingComments: meta.trailingComments || "",
+          rawHeading: "", // Force regeneration of heading for the copy
+          leadingWhitespace: meta.leadingWhitespace || "\n",
+          trailingWhitespace: meta.trailingWhitespace || "\n\n",
+          environments: meta.environments || [],
+          originalCmd: cmd,
+          originalStarred: starred,
+          originalTitle: title ? `${title} (copy)` : "",
+        };
+        // Insert the duplicate right after the original card
+        const tempContainer = document.createElement("div");
+        rdSections.appendChild(tempContainer);
+        appendSectionCard(dupSection);
+        const newCard = rdSections.lastElementChild;
+        card.after(newCard);
+        tempContainer.remove();
+        markBuilderDirty();
+      }
+      return;
+    }
+
+    // Remove section
     const removeBtn = e.target.closest('button[data-remove="section"]');
     if (!removeBtn) return;
     const card = removeBtn.closest('[data-card="section"]');

@@ -862,6 +862,24 @@ body {
   border-color: rgba(255, 107, 107, 0.35);
 }
 
+.rb-duplicate {
+  border: 1px solid rgba(108, 92, 231, 0.2);
+  color: var(--accent);
+  background: rgba(108, 92, 231, 0.08);
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-family: inherit;
+  transition: all var(--transition-fast);
+}
+
+.rb-duplicate:hover {
+  background: rgba(108, 92, 231, 0.18);
+  border-color: rgba(108, 92, 231, 0.35);
+}
+
 .rd-grid {
   display: grid;
   grid-template-columns: minmax(140px, 200px) 1fr auto;
