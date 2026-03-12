@@ -1,6 +1,6 @@
-# TecTex
+# Tecxter
 
-I started **TecTex** because I wanted to make a genuinely good resume, and I realised LaTeX gives the best results for clean, professional formatting.
+I started **Tecxter** because I wanted to make a genuinely good resume, and I realised LaTeX gives the best results for clean, professional formatting.
 
 The problem: LaTeX tools can feel annoying for quick resume edits.
 
@@ -11,7 +11,7 @@ So I built this as a local-first desktop app where I can:
 
 It’s still a work in progress, and I’ll keep improving it over time until it reaches my vision: an all-in-one resume editor with LaTeX at its core.
 
-## What TecTex Does
+## What Tecxter Does
 
 - TeX editor + PDF preview
 - Native `Save As PDF` in desktop mode
@@ -98,4 +98,4 @@ Output:
 
 This is a personal project that grew from my own workflow pain.
 I wanted resume quality from LaTeX without the usual friction.
-TecTex is my attempt to make that process faster, safer, and practical for day-to-day updates.
+Tecxter is my attempt to make that process faster, safer, and practical for day-to-day updates.
